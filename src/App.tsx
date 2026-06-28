@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LoginForm } from './components/LoginForm';
 import { SignupForm } from './components/SignupForm';
-import { Dashboard } from './components/Dashboard';
+import { GigDashboard } from './components/GigDashboard';
 import { OnboardingForm } from './components/OnboardingForm';
+import { PublicInvite } from './pages/PublicInvite';
 
 type AuthView = 'login' | 'signup';
 
@@ -30,6 +31,18 @@ function AuthScreen() {
 
 function AppContent() {
   const { user, loading, hasProfile } = useAuth();
+  const [pathname, setPathname] = useState(window.location.pathname);
+
+  useEffect(() => {
+    const onLocationChange = () => setPathname(window.location.pathname);
+    window.addEventListener('popstate', onLocationChange);
+    return () => window.removeEventListener('popstate', onLocationChange);
+  }, []);
+
+  // 1. ROTA PÚBLICA: /invite/:id (100% aberta, ignora autenticação)
+  if (pathname.startsWith('/invite/')) {
+    return <PublicInvite />;
+  }
 
   if (loading) {
     return (
@@ -50,12 +63,15 @@ function AppContent() {
     );
   }
 
-  if (hasProfile === false) {
+  // 2. CHAVE MESTRA DO ONBOARDING:
+  // Ativa se o Supabase acusar pendência OU se você digitar /onboarding no link
+  if (pathname === '/onboarding' || hasProfile === false) {
     return <OnboardingForm />;
   }
 
+  // 3. LOGADO COM PERFIL -> Painel Real de Shows
   if (hasProfile === true) {
-    return <Dashboard />;
+    return <GigDashboard />;
   }
 
   return (
@@ -68,12 +84,10 @@ function AppContent() {
   );
 }
 
-function App() {
+export default function App() {
   return (
     <AuthProvider>
       <AppContent />
     </AuthProvider>
   );
 }
-
-export default App;

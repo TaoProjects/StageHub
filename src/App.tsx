@@ -11,10 +11,19 @@ function AuthScreen() {
   const [view, setView] = useState<AuthView>('login');
   const { signIn, signUp } = useAuth();
 
+  // Funções intermediárias para resolver o conflito de tipos do TypeScript
+  const handleSignIn = async (...args: any[]) => {
+    return (signIn as any)(...args);
+  };
+
+  const handleSignUp = async (...args: any[]) => {
+    return (signUp as any)(...args);
+  };
+
   if (view === 'signup') {
     return (
       <SignupForm
-        onSignUp={signUp}
+        onSignUp={handleSignUp}
         onSwitchToLogin={() => setView('login')}
       />
     );
@@ -22,7 +31,7 @@ function AuthScreen() {
 
   return (
     <LoginForm
-      onSignIn={signIn}
+      onSignIn={handleSignIn}
       onSwitchToSignup={() => setView('signup')}
     />
   );
@@ -43,7 +52,7 @@ function AppContent() {
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-zinc-400">a carregar...</p>
+          <p className="text-zinc-400">Carregando...</p>
         </div>
       </div>
     );
@@ -57,7 +66,6 @@ function AppContent() {
     );
   }
 
-  // CHAVE MESTRA: Força a abertura do formulário se digitares /onboarding no link
   if (pathname === '/onboarding' || hasProfile === false) {
     return <OnboardingForm />;
   }
@@ -70,7 +78,7 @@ function AppContent() {
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
       <div className="flex flex-col items-center gap-4">
         <div className="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-zinc-400">a verificar perfil...</p>
+        <p className="text-zinc-400">Verificando perfil...</p>
       </div>
     </div>
   );
